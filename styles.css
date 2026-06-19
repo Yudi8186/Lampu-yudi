@@ -9,8 +9,8 @@ body {
   background-color: #f4f4f4;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: Left;
+  align-items: left;
   height:100;
   position: relative;
  

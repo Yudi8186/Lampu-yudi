@@ -68,3 +68,76 @@
         }       
     </script>
 </html>
+
+
+
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUAREP LAMPU SERVER</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Label "Terhubung" -->
+  <div class="status">
+    <p id="status">Terputus</p>
+  </div>
+    <div class="card">
+      <h2>ON-OFF lampu</h2>
+      <label class="switch">
+        <input type="checkbox" id="lamp-switch" onchange="publishLampu()">
+        <span class="slider" id="slider-lamp"></span>
+      </label>
+    </div>
+   
+</body>
+ <!-- Label "KONEKSI DENGAN MQTT" -->
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script>
+        const clientId = Math.random().toString(16).substr(2, 8);
+        const host = 'wss://broker.emqx.io:8084/mqtt';
+
+        const options = {
+          keepalive: 30,
+          clientId: clientId,
+          protocolId: 'MQTT',
+          protocolVersion: 4,
+          clean: true,
+          reconnectPeriod: 1000,
+          connectTimeout: 30 * 1000
+        }
+
+        console.log("Menghubungkan ke Broker");
+        const client = mqtt.connect(host, options);
+
+        client.on('connect', () => {
+          console.log('Terhubung ke broker:' + clientId)
+          client.subscribe('rokhmad.com/#', { qos: 1 })
+          document.getElementById("status").innerHTML = "Terhubung";
+        })
+        client.on('message', (topic, message, packet) => {         
+          if(topic === "rokhmad.com/lampu"){
+            const lampSwitch = document.getElementById("lamp-switch");
+            var slider = document.querySelector('.slider');
+            if(message.toString() === "on"){
+              lampSwitch.checked = true;
+              slider.classList.add("on");
+            } else {
+              lampSwitch.checked = false;
+              slider.classList.remove("on");
+            }
+          }
+        })
+
+        function publishLampu(){
+          var valueLampu = document.querySelector('#lamp-switch').checked;
+          if(valueLampu){
+            client.publish("rokhmad.com/lampu", "on", {qos: 1, retain: true});
+          }else{
+            client.publish("rokhmad.com/lampu", "off", {qos: 1, retain: true});
+          }
+        }       
+    </script>
+</html>
